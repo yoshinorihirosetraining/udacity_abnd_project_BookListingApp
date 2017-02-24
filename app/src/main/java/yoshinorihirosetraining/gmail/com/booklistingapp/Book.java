@@ -32,6 +32,10 @@ public class Book {
         return new Adapter(context, lst);
     }
 
+    public static Adapter getEmptyAdapter(Context context) {
+        return new Adapter(context, new BookList());
+    }
+
     /**
      * List class of Books.
      * -- for avoiding many "add new"s.
