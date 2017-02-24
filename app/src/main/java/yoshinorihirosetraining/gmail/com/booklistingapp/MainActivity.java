@@ -1,7 +1,10 @@
 package yoshinorihirosetraining.gmail.com.booklistingapp;
 
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -14,13 +17,19 @@ import butterknife.OnClick;
 
 import static android.view.View.GONE;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity
+        extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Book.Adapter> {
+
     @BindView(R.id.edittext) EditText editText;
     @BindView(R.id.empty_text) TextView emptyText;
     @BindView(R.id.loading_indicator) ProgressBar loadingIndicator;
     @BindView(R.id.list) ListView listView;
 
+    private final String TAG = "MainActivity";
     private State state;
+    private String keyword;
+    private static int runningLoaderId = 0;
 
     /**
      * represents States of MainActivity
@@ -65,21 +74,42 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.button)
     public void submit() {
-        String keyword = editText.getText().toString().trim();
-        if (keyword.isEmpty()) {
+        this.keyword = this.editText.getText().toString().trim();
+        if (this.keyword.isEmpty()) {
             setStateEmpty("Input Search Keyword.");
             return;
         }
         setStateLoading();
 
-        /* ProgressBar is not appeared in case of sleeping Main Thread.
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            ; // void
+        LoaderManager manager = getLoaderManager();
+        if (runningLoaderId != 0) {
+            manager.getLoader(runningLoaderId).stopLoading();
+            manager.destroyLoader(runningLoaderId);
         }
+        runningLoaderId++;
+        manager.initLoader(runningLoaderId, null, this).forceLoad();
+    }
 
-        setStateLoaded(Book.getDummyAdapter(this));
-        */
+    /**
+     * implementations of LoaderManager.LoaderCallBacks
+     */
+
+    @Override
+    public Loader<Book.Adapter> onCreateLoader(int id, Bundle args) {
+        Log.v(TAG, "onCreateLoader()");
+        return new HttpLoader(this, this.keyword);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Book.Adapter> loader, Book.Adapter adapter) {
+        Log.v(TAG, "onLoadFinished(), id=" + runningLoaderId + ", keyword=" + ((HttpLoader)loader).getKeyword());
+        if (loader.getId() != runningLoaderId) return;
+        setStateLoaded(adapter);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Book.Adapter> loader) {
+        Log.v(TAG, "onLoaderReset()");
+        // NOT used
     }
 }
