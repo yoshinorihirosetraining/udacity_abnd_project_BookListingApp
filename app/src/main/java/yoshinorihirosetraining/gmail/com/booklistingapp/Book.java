@@ -24,22 +24,6 @@ public class Book {
         return "Book";
     }
 
-    public static BookList getDummyBookList() {
-        BookList lst = new BookList();
-        lst.add("1Q84", "Haruki Murakami, Jay Rubin, Philip Gabirel",
-                "Vintage", "May 14, 2012");
-        lst.add("The C++ Programming Language, 4th Edition", "Bjarne Stroustrup",
-                "Addison-Wesley Professional", "May 19, 2013");
-        lst.add("Star Wars: A Droid's Tale Soundstory",
-                "John Whitman, Anthony Daniels, et al.",
-                "Golden Books", "November 1997");
-        return lst;
-    }
-
-    public static Adapter getDummyAdapter(Context context) {
-        return new Adapter(context, getDummyBookList());
-    }
-
     public static Adapter getEmptyAdapter(Context context) {
         return new Adapter(context, new BookList());
     }
