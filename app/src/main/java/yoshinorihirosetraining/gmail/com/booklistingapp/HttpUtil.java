@@ -43,6 +43,7 @@ public final class HttpUtil {
         String response = null;
         URL url = null;
         HttpURLConnection conn = null;
+        int responseCode = -1;
         InputStream in = null;
         BufferedReader reader = null;
         StringBuilder b = null;
@@ -67,6 +68,24 @@ public final class HttpUtil {
             conn.setRequestMethod("GET");
         } catch (ProtocolException e) {
             Log.d(TAG, "ProtocolException");
+            return null;
+        }
+
+        try {
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+        } catch (IllegalArgumentException e) {
+            assert false;
+        }
+
+        try {
+            responseCode = conn.getResponseCode();
+        } catch (IOException e) {
+            Log.d(TAG, "IOException(conn.getResponseCode)");
+            return null;
+        }
+        if (responseCode != 200) {
+            Log.d(TAG, "Response Code: " + responseCode);
             return null;
         }
 

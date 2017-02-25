@@ -26,7 +26,7 @@ public class MainActivity
     @BindView(R.id.loading_indicator) ProgressBar loadingIndicator;
     @BindView(R.id.list) ListView listView;
 
-    private final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
     private static State state = State.Empty;
     private static String emptyMessage = "No Results Here.";
     private static Book.BookList bookList = new Book.BookList();
