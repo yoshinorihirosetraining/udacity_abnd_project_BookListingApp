@@ -2,6 +2,10 @@ package yoshinorihirosetraining.gmail.com.booklistingapp;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -94,5 +98,38 @@ public final class HttpUtil {
             return null;
 
         return b.toString();
+    }
+
+    public static Book.BookList parseJSON(String jsonString) {
+        final String TAG = "HttpUtil.parseJSON()";
+        Book.BookList lst = new Book.BookList();
+
+        try {
+            JSONObject json = new JSONObject(jsonString);
+            JSONArray ary = json.getJSONArray("items");
+            for (int i = 0; i < ary.length(); i++) {
+                JSONObject item = ary.getJSONObject(i);
+                JSONObject info = item.getJSONObject("volumeInfo");
+                String title = info.getString("title");
+                JSONArray authors = info.optJSONArray("authors");
+                String author = "Unknown Author";
+                if (authors != null) {
+                    StringBuilder b = new StringBuilder();
+                    for (int j = 0; j < authors.length(); j++) {
+                        if (j != 0) b.append(", ");
+                        b.append(authors.getString(j));
+                    }
+                    author = b.toString();
+                }
+                String publisher = info.optString("publisher", "Unknown Publisher");
+                String date = info.optString("publishedDate", "Unknown Published Date");
+                lst.add(title, author, publisher, date);
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "unexpected JSON format\n" + e.getMessage());
+            return null;
+        }
+
+        return lst;
     }
 }

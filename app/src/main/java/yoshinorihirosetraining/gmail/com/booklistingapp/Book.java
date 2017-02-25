@@ -60,7 +60,7 @@ public class Book {
      */
     public static class Adapter extends ArrayAdapter<Book> {
 
-        private Adapter(Context context, List<Book> books) {
+        public Adapter(Context context, List<Book> books) {
             super(context, R.layout.list_item, books);
         }
 

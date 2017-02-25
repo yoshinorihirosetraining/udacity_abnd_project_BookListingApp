@@ -26,9 +26,11 @@ public class HttpLoader extends AsyncTaskLoader<Book.Adapter> {
     public Book.Adapter loadInBackground() {
         Log.v(TAG, "loadInBackground()");
 
-        Log.v("Debug", HttpUtil.download(HttpUtil.getRequestString("村上春樹", 40)));
-
-        return Book.getDummyAdapter(getContext());
+        String requestUrl = HttpUtil.getRequestString(this.keyword, 40);
+        String json = HttpUtil.download(requestUrl);
+        Log.v("TAG", json);
+        Book.BookList lst = HttpUtil.parseJSON(json);
+        return new Book.Adapter(getContext(), lst);
     }
 
     @Override
