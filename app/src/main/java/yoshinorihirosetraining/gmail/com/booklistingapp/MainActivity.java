@@ -69,6 +69,8 @@ public class MainActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        Log.v("Debug", HttpUtil.getRequestString("村上春樹 ノルウェー", 40));
+
         setStateEmpty("No Results Here.");
     }
 
