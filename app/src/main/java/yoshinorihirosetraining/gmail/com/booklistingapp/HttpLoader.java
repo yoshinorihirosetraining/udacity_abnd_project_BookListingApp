@@ -26,11 +26,7 @@ public class HttpLoader extends AsyncTaskLoader<Book.Adapter> {
     public Book.Adapter loadInBackground() {
         Log.v(TAG, "loadInBackground()");
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            ; // void
-        }
+        Log.v("Debug", HttpUtil.download(HttpUtil.getRequestString("村上春樹", 40)));
 
         return Book.getDummyAdapter(getContext());
     }
