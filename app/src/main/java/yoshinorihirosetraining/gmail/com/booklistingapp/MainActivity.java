@@ -94,8 +94,11 @@ public class MainActivity
 
         LoaderManager manager = getLoaderManager();
         if (runningLoaderId != 0) {
-            manager.getLoader(runningLoaderId).stopLoading();
-            manager.destroyLoader(runningLoaderId);
+            Loader<Book.BookList> loader = manager.getLoader(runningLoaderId);
+            if (loader != null) {
+                manager.getLoader(runningLoaderId).stopLoading();
+                manager.destroyLoader(runningLoaderId);
+            }
         }
         runningLoaderId++;
         manager.initLoader(runningLoaderId, null, this).forceLoad();
