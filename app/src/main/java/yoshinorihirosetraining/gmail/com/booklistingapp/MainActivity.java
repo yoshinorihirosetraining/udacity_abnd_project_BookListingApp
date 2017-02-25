@@ -11,20 +11,16 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 import static android.view.View.GONE;
 
 public class MainActivity
         extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Book.BookList> {
 
-    @BindView(R.id.edittext) EditText editText;
-    @BindView(R.id.empty_text) TextView emptyText;
-    @BindView(R.id.loading_indicator) ProgressBar loadingIndicator;
-    @BindView(R.id.list) ListView listView;
+    private EditText editText = null;
+    private TextView emptyText = null;
+    private ProgressBar loadingIndicator = null;
+    private ListView listView = null;
 
     private static final String TAG = "MainActivity";
     private static State state = State.Empty;
@@ -78,13 +74,17 @@ public class MainActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+
+        editText = (EditText)findViewById(R.id.edittext);
+        emptyText = (TextView)findViewById(R.id.empty_text);
+        loadingIndicator = (ProgressBar)findViewById(R.id.loading_indicator);
+        listView = (ListView)findViewById(R.id.list);
+
         this.listView.setEmptyView(this.emptyText);
         updateUi();
     }
 
-    @OnClick(R.id.button)
-    public void submit() {
+    public void submit(View view) {
         this.keyword = this.editText.getText().toString().trim();
         if (this.keyword.isEmpty()) {
             setStateEmpty("Input Search Keyword.");
