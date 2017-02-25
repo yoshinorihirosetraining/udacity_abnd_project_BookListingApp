@@ -20,6 +20,10 @@ public class Book {
     private String publisher;
     private String date;
 
+    public String toString() {
+        return "Book";
+    }
+
     public static BookList getDummyBookList() {
         BookList lst = new BookList();
         lst.add("1Q84", "Haruki Murakami, Jay Rubin, Philip Gabirel",
@@ -40,11 +44,21 @@ public class Book {
         return new Adapter(context, new BookList());
     }
 
+    public static BookList getErrorBookList(String message) {
+        BookList lst = new BookList();
+        lst.failed = true;
+        lst.errorMessage = message;
+        return lst;
+    }
+
     /**
      * List class of Books.
      * -- for avoiding many "add new"s.
      */
     public static class BookList extends ArrayList<Book> {
+        private boolean failed = false;
+        private String errorMessage = "";
+
         public void add(String title, String author, String publisher, String date) {
             Book book = new Book();
             book.title = title;
@@ -52,6 +66,29 @@ public class Book {
             book.publisher = publisher;
             book.date = date;
             super.add(book);
+        }
+
+        public boolean isFailed() {
+            return failed;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            b.append("Book.BookList { isFailed=");
+            b.append(failed ? "true" : "false");
+            b.append(", errorMessage=\"");
+            b.append(errorMessage);
+            b.append("\", data=[");
+            for (int i = 0; i < this.size(); i++) {
+                b.append(this.get(i).toString());
+                if (i != this.size() - 1) b.append(", ");
+            }
+            b.append("] }");
+            return b.toString();
         }
     }
 

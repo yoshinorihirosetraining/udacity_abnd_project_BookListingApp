@@ -27,9 +27,18 @@ public class HttpLoader extends AsyncTaskLoader<Book.BookList> {
         Log.v(TAG, "loadInBackground()");
 
         String requestUrl = HttpUtil.getRequestString(this.keyword, 40);
+        if (requestUrl == null) {
+            return Book.getErrorBookList("Internal Error.");
+        }
         String json = HttpUtil.download(requestUrl);
+        if (json == null) {
+            return Book.getErrorBookList("Network Connection Error.");
+        }
         Log.v("TAG", json);
         Book.BookList lst = HttpUtil.parseJSON(json);
+        if (lst == null) {
+            return Book.getErrorBookList("Unexpected Response from Server.");
+        }
         return lst;
     }
 

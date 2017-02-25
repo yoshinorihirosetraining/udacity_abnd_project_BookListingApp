@@ -45,12 +45,14 @@ public class MainActivity
     private void setStateEmpty(String message) {
         this.state = State.Empty;
         this.emptyMessage = message;
+        this.bookList = null;
         updateUi();
     }
 
     private void setStateLoading() {
         this.state = State.Loading;
         this.emptyMessage = "";
+        this.bookList = null;
         updateUi();
     }
 
@@ -112,7 +114,15 @@ public class MainActivity
     @Override
     public void onLoadFinished(Loader<Book.BookList> loader, Book.BookList bookList) {
         Log.v(TAG, "onLoadFinished(), id=" + runningLoaderId + ", keyword=" + ((HttpLoader)loader).getKeyword());
+        Log.v(TAG, bookList.toString());
+
         if (loader.getId() != runningLoaderId) return;
+
+        if (bookList.isFailed()) {
+            setStateEmpty(bookList.getErrorMessage());
+            return;
+        }
+
         setStateLoaded(bookList);
     }
 
