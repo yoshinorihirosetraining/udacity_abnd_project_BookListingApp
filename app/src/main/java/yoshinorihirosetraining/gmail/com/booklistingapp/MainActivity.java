@@ -19,7 +19,7 @@ import static android.view.View.GONE;
 
 public class MainActivity
         extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Book.Adapter> {
+        implements LoaderManager.LoaderCallbacks<Book.BookList> {
 
     @BindView(R.id.edittext) EditText editText;
     @BindView(R.id.empty_text) TextView emptyText;
@@ -27,8 +27,10 @@ public class MainActivity
     @BindView(R.id.list) ListView listView;
 
     private final String TAG = "MainActivity";
-    private State state;
-    private String keyword;
+    private static State state = State.Empty;
+    private static String emptyMessage = "No Results Here.";
+    private static Book.BookList bookList = new Book.BookList();
+    private static String keyword;
     private static int runningLoaderId = 0;
 
     /**
@@ -42,25 +44,32 @@ public class MainActivity
 
     private void setStateEmpty(String message) {
         this.state = State.Empty;
-        this.emptyText.setText(message);
-        this.loadingIndicator.setVisibility(GONE);
-        this.listView.setAdapter(Book.getEmptyAdapter(this));
+        this.emptyMessage = message;
+        updateUi();
     }
 
     private void setStateLoading() {
         this.state = State.Loading;
-        this.emptyText.setText("");
-        this.emptyText.setVisibility(GONE);
-        this.loadingIndicator.setVisibility(View.VISIBLE);
-        this.listView.setAdapter(Book.getEmptyAdapter(this));
+        this.emptyMessage = "";
+        updateUi();
     }
 
-    private void setStateLoaded(Book.Adapter adapter) {
+    private void setStateLoaded(Book.BookList bookList) {
         this.state = State.Loaded;
-        this.emptyText.setText("No Books Found.");
-        this.loadingIndicator.setVisibility(GONE);
-        this.listView.setAdapter(adapter);
-        this.listView.setEmptyView(this.emptyText);
+        this.emptyMessage = "No Books Found.";
+        this.bookList = bookList;
+        updateUi();
+    }
+
+    private void updateUi() {
+        this.emptyText.setText(this.emptyMessage);
+        int loadingIndicatorVisibility = this.state == State.Loading ? View.VISIBLE : GONE;
+        this.loadingIndicator.setVisibility(loadingIndicatorVisibility);
+        if (this.bookList != null) {
+            this.listView.setAdapter(new Book.Adapter(this, this.bookList));
+        } else {
+            this.listView.setAdapter(Book.getEmptyAdapter(this));
+        }
     }
 
     @Override
@@ -68,8 +77,8 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        setStateEmpty("No Results Here.");
+        this.listView.setEmptyView(this.emptyText);
+        updateUi();
     }
 
     @OnClick(R.id.button)
@@ -95,20 +104,20 @@ public class MainActivity
      */
 
     @Override
-    public Loader<Book.Adapter> onCreateLoader(int id, Bundle args) {
+    public Loader<Book.BookList> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "onCreateLoader()");
         return new HttpLoader(this, this.keyword);
     }
 
     @Override
-    public void onLoadFinished(Loader<Book.Adapter> loader, Book.Adapter adapter) {
+    public void onLoadFinished(Loader<Book.BookList> loader, Book.BookList bookList) {
         Log.v(TAG, "onLoadFinished(), id=" + runningLoaderId + ", keyword=" + ((HttpLoader)loader).getKeyword());
         if (loader.getId() != runningLoaderId) return;
-        setStateLoaded(adapter);
+        setStateLoaded(bookList);
     }
 
     @Override
-    public void onLoaderReset(Loader<Book.Adapter> loader) {
+    public void onLoaderReset(Loader<Book.BookList> loader) {
         Log.v(TAG, "onLoaderReset()");
         // NOT used
     }
