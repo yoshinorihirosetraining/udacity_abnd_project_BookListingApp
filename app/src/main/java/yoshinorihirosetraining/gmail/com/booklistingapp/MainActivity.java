@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -27,7 +28,6 @@ public class MainActivity
     private static String emptyMessage = "No Results Here.";
     private static Book.BookList bookList = new Book.BookList();
     private static String keyword;
-    private static int runningLoaderId = 0;
 
     /**
      * represents States of MainActivity
@@ -72,6 +72,7 @@ public class MainActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("MainActivity", "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -81,6 +82,15 @@ public class MainActivity
         listView = (ListView)findViewById(R.id.list);
 
         this.listView.setEmptyView(this.emptyText);
+
+        // if loader exists, relink this Activity to loader.
+        LoaderManager manager = getLoaderManager();
+        if (manager.getLoader(0) != null) {
+            manager.restartLoader(0, null, this);
+        }
+
+        // if loading, restart loading
+        if (state == State.Loading) submit((Button)findViewById(R.id.button));
         updateUi();
     }
 
@@ -93,15 +103,13 @@ public class MainActivity
         setStateLoading();
 
         LoaderManager manager = getLoaderManager();
-        if (runningLoaderId != 0) {
-            Loader<Book.BookList> loader = manager.getLoader(runningLoaderId);
-            if (loader != null) {
-                manager.getLoader(runningLoaderId).stopLoading();
-                manager.destroyLoader(runningLoaderId);
-            }
+        Loader loader = manager.getLoader(0);
+        if (loader != null) {
+            loader.stopLoading();
+            manager.restartLoader(0, null, this).forceLoad();
+        } else {
+            manager.initLoader(0, null, this).forceLoad();
         }
-        runningLoaderId++;
-        manager.initLoader(runningLoaderId, null, this).forceLoad();
     }
 
     /**
@@ -116,10 +124,8 @@ public class MainActivity
 
     @Override
     public void onLoadFinished(Loader<Book.BookList> loader, Book.BookList bookList) {
-        Log.v(TAG, "onLoadFinished(), id=" + runningLoaderId + ", keyword=" + ((HttpLoader)loader).getKeyword());
+        Log.v(TAG, "onLoadFinished(), keyword=" + ((HttpLoader)loader).getKeyword());
         Log.v(TAG, bookList.toString());
-
-        if (loader.getId() != runningLoaderId) return;
 
         if (bookList.isFailed()) {
             setStateEmpty(bookList.getErrorMessage());
