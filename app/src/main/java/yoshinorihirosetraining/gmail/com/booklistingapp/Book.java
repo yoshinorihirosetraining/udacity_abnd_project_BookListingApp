@@ -81,18 +81,36 @@ public class Book {
      */
     public static class Adapter extends ArrayAdapter<Book> {
 
+        private static class ViewHolder {
+            TextView title;
+            TextView body;
+        }
+
+        private ViewHolder viewHolder = null;
+
         public Adapter(Context context, List<Book> books) {
             super(context, R.layout.list_item, books);
         }
 
         @Override public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) getContext()
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View item = inflater.inflate(R.layout.list_item, parent, false);
+            View item = null;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                LayoutInflater inflater = (LayoutInflater) getContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                item = inflater.inflate(R.layout.list_item, parent, false);
+                viewHolder.title = (TextView) item.findViewById(R.id.list_item_title);
+                viewHolder.body = (TextView) item.findViewById(R.id.list_item_body);
+                item.setTag(viewHolder);
+            } else {
+                item = convertView;
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
             Book book = getItem(position);
-            setText(item, R.id.list_item_title, book.title);
-            setText(item, R.id.list_item_body,
-                    book.author + " / " + book.publisher + ", " + book.date);
+            viewHolder.title.setText(book.title);
+            viewHolder.body.setText(book.author + " / " + book.publisher + ", " + book.date);
+
             return item;
         }
 
